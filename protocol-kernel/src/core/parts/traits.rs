@@ -1,7 +1,11 @@
 use std::collections::HashMap;
 
 use crate::{
-    core::{parts::transport_pair::TransportPair, type_converter::FieldTranslator, RW},
+    core::{
+        parts::{decoding_filter::DecodingFilter, transport_pair::TransportPair},
+        type_converter::FieldTranslator,
+        RW,
+    },
     hex_util, DirectionEnum, FieldCompareDecoder, FieldConvertDecoder, FieldEnumDecoder, FieldType,
     MsgTypeEnum, ProtocolError, ProtocolResult, Rawfield, Reader, Symbol, TryFromBytes, Writer,
 };
@@ -269,16 +273,37 @@ where
         !self.compare_target().is_empty()
     }
 
+    // 拦截器。decoder经常存在某个帧字段有“特殊值”的设定，比如FF表示不存在，而不是255.
+    // 在这里声明FF的特殊解析对应的title是什么，然后如果输入能够匹配到，则直接终止之后的解析。
+    fn filter(&self) -> Option<DecodingFilter> {
+        None
+    }
+
+    // 核心方法。最终的解码实现
+    // 只要按照规则定义了以上的内容，这个方法就会自动解码。
+    // 如果你懒得看以上定义，那就重写这个方法
     fn translate(&self, bytes: &[u8]) -> ProtocolResult<Rawfield> {
+        if let Some(filter) = self.filter() {
+            // 如果拦截器拦截到了，终止之后的解析
+            if filter.matches(bytes) {
+                let value = filter.title();
+                return Ok(Rawfield::new(bytes, self.title(), value));
+            }
+        }
+        // 优先级从上到下分别是:
         if self.is_compare_mode() {
+            // 1.比较模式(这种模式如果匹配不上会抛错,比如crc的比较就可以用这个)
             FieldCompareDecoder::new(&self.title(), self.compare_target(), self.swap())
                 .translate(bytes)
         } else if self.is_translate_mode() {
+            // 2.翻译模式(按照定义的FieldType进行翻译,包含所有16进制支持的类型)
             FieldConvertDecoder::new(&self.title(), self.field_type(), self.symbol(), self.swap())
                 .translate(bytes)
         } else if self.is_enum_mode() {
+            // 3.枚举模式(指定几个枚举值)
             FieldEnumDecoder::new(&self.title(), self.enum_values(), self.swap()).translate(bytes)
         } else {
+            // 一个解析器都找不到，那就抛错。
             Err(ProtocolError::CommonError("auto-decoding-params requires at least one of the following: enum, translate, compare".into()))
         }
     }

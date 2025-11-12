@@ -1,3 +1,4 @@
+pub mod decoding_filter;
 pub mod placeholder;
 pub mod raw_capsule;
 pub mod raw_chamber;
