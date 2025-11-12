@@ -1,0 +1,15 @@
+[package]
+name = "protocol-digester"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+protocol-base = { path = "../protocol-base" }
+hex = "0.4.3"
+aes = "0.8.4"
+rand = "0.9.2"
+md5 = "0.8.0"
+cipher = { version = "0.4.4", features = ["block-padding"] }
+
+[lib]
+crate-type = ["rlib"]
