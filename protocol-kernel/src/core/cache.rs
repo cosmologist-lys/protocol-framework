@@ -33,6 +33,10 @@ impl ProtocolCache {
     // 从缓存里获取，如果空，则根据unique&upstream_count_hex创建一个新的。upstream_count_hex是上行序列号，通常来说，协议都需要。如果不需要传个随便什么就行。
     pub fn read_or_default(unique: &str, upstream_count_hex: &str) -> Arc<TransportCarrier> {
         Self::read(unique).unwrap_or_else(|| {
+            eprintln!(
+                "[WARN] Failed to read cache for {}: {}, using default",
+                unique, upstream_count_hex
+            );
             let tp = TransportCarrier::new_with_device_no_and_upstream_count_hex(
                 unique,
                 upstream_count_hex,

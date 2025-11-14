@@ -4,11 +4,17 @@ macro_rules! handle_int {
     ($type:ty, $len:expr, $bytes:expr, $scale:expr) => {{
         // 1. 检查长度
         if $bytes.len() != $len {
+            let hex_string = $bytes
+                .iter()
+                .map(|b| format!("{:02x}", b))
+                .collect::<Vec<_>>()
+                .join(" ");
             return Err(ProtocolError::ValidationFailed(format!(
-                "Invalid byte length for {}. Expected {}, got {}",
+                "Invalid byte length for {}. Expected {}, got {}. Input hex: [{}]",
                 stringify!($type),
                 $len,
-                $bytes.len()
+                $bytes.len(),
+                hex_string
             )));
         }
         // 2. 从大端字节转换

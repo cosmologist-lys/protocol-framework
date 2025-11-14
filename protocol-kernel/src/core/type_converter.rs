@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 
 use crate::math_util::{self, DecimalRoundingMode};
 use crate::{
-    ProtocolError, ProtocolResult, Rawfield, Symbol, handle_int, handle_int_encode, hex_util,
+    handle_int, handle_int_encode, hex_util, ProtocolError, ProtocolResult, Rawfield, Symbol,
 };
 
 #[derive(Debug, Clone)]
