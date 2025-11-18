@@ -79,18 +79,6 @@ pub trait Cmd: DynClone {
     }
 }
 
-pub trait ProtocolConfig {
-    fn head_tag(&self) -> String;
-
-    fn tail_tag(&self) -> String;
-
-    fn crc_mode(&self) -> protocol_base::definitions::defi::CrcType;
-
-    fn crc_index(&self) -> (u8, u8);
-
-    fn length_index(&self) -> (u8, u8);
-}
-
 // 下行参数设置，针对单个帧字段
 pub trait AutoEncodingParam {
     fn code(&self) -> String; // 唯一标识符

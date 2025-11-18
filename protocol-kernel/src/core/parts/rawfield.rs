@@ -2,8 +2,11 @@
 #[derive(Debug, Clone, Default)]
 pub struct Rawfield {
     pub(crate) bytes: Vec<u8>,
+    // 帧字段名称
     pub(crate) title: String,
+    // hex值
     pub(crate) hex: String,
+    // 真值
     pub(crate) value: String,
 }
 
